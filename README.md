@@ -13,7 +13,7 @@
 <div align="center">
   <h2>"비즈니스의 복잡함을 견고한 코드로 단순화합니다."</h2>
   
-  금융 비전공자의 <b>도메인 이해도</b>와 <b>개발자의 기술적 전문성</b>을 결합하여<br>
+  금융 전공자의 <b>도메인 이해도</b>와 <b>개발자의 기술적 전문성</b>을 결합하여<br>
   단순 구현을 넘어 <b>'확장 가능하고 신뢰할 수 있는 금융 서비스'</b>를 설계하는 것에 가치를 둡니다.<br>
   현재 <b>Python/Django</b> 환경에서 대량의 데이터를 효율적으로 처리하는 로직 최적화에 집중하고 있습니다.
 </div>
@@ -62,7 +62,5 @@
   <a href="mailto:dudcjf1231@gmail.com">
     <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" />
   </a>
-  <a href="https://본인블로그주소.com">
-    <img src="https://img.shields.io/badge/Tech_Blog-000000?style=for-the-badge&logo=tistory&logoColor=white" />
-  </a>
+
 </div>
