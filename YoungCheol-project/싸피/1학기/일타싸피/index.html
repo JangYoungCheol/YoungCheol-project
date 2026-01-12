@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>일타싸피 연습용 미니 시뮬레이터</title>
+  <style>
+    :root {
+      --bg: #0b6b3a; /* felt green */
+      --rail: #2d2a26;
+      --pocket: #111;
+      --text: #111;
+      --panel: #f6f7f9;
+      --brand: #0ea5e9;
+    }
+    html, body {height: 100%;}
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: #fff; color: var(--text);
+      display: grid; grid-template-rows: auto 1fr; gap: 8px; padding: 12px;
+    }
+    header {display: flex; align-items: center; justify-content: space-between;}
+    h1 {margin: 0; font-size: 18px; font-weight: 700;}
+    .panel {
+      background: var(--panel); border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    label {font-size: 13px; display: inline-flex; align-items: center; gap: 6px;}
+    input[type=number] {width: 90px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 8px;}
+    input[type=checkbox] {transform: translateY(1px);}
+    button {
+      padding: 8px 12px; border-radius: 10px; border: 1px solid #d1d5db; background: white; cursor: pointer; font-weight: 600;
+    }
+    button.primary {background: var(--brand); border-color: var(--brand); color: white;}
+    button:disabled {opacity: 0.5; cursor: not-allowed;}
+    #status {margin-left: 6px; font-size: 12px; color: #334155;}
+    #tableWrap {display: grid; place-items: center;}
+    canvas {max-width: 100%; height: auto; border-radius: 16px;}
+    details {font-size: 13px;}
+    summary {cursor: pointer;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>일타싸피 연습용 미니 시뮬레이터</h1>
+  </header>
+
+  <div class="panel">
+    <label>각도(도, 0°=→, 90°=↓)
+      <input id="angle" type="number" step="0.1" value="0" />
+    </label>
+    <label>파워(0–100)
+      <input id="power" type="number" step="1" value="50" />
+    </label>
+    <button id="shoot" class="primary">샷 실행</button>
+    <button id="recommend">AI 추천 각도·파워</button>
+    <button id="reset">재배치</button>
+    <label><input id="showLines" type="checkbox" checked /> 보조선</label>
+    <label><input id="slowMo" type="checkbox" /> 슬로모션</label>
+    <label>마찰(느림 ↔ 빠름)
+      <input id="friction" type="range" min="0.985" max="0.9995" step="0.0005" value="0.993" />
+    </label>
+    <span id="status"></span>
+  </div>
+
+  <div id="tableWrap">
+    <canvas id="cv" width="900" height="450" aria-label="billiards table"></canvas>
+  </div>
+
+  <details>
+    <summary>사용법/가정</summary>
+    <ul>
+      <li>각도는 0°가 오른쪽, 90°가 아래쪽입니다. 캔버스 좌표계를 따릅니다.</li>
+      <li>샷은 <em>큐볼</em>에만 적용됩니다. 모든 공이 정지해야 다음 샷을 입력할 수 있습니다.</li>
+      <li>물리는 단순화했습니다(동일 질량, 완전 탄성 충돌, 선형 마찰). 실제 일타싸피와 상수/좌표계가 다를 수 있습니다.</li>
+      <li>포켓은 6개(모서리+중앙). 공 중심이 포켓 중심 반경 내로 들어가면 포켓된 것으로 간주합니다.</li>
+      <li>"AI 추천"은 가장 가까운 목적구를 선택해 가장 가까운 포켓을 노리는 단순 휴리스틱입니다.</li>
+    </ul>
+  </details>
+
+  <script>
+  // ===== Table & Physics Constants =====
+  const canvas = document.getElementById('cv');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const BALL_R = 10;            // px
+  const POCKET_R = 22;          // px
+  const DT_BASE = 1/60;         // 60 FPS 기준 물리 시간(step)
+  const POWER_TO_SPEED = 2.6;   // 파워→초기 속도(튜닝 값)
+  const STOP_EPS = 0.03;        // 이 속도 이하이면 정지로 간주
+
+  let FRICTION = parseFloat(document.getElementById('friction').value);
+
+  const pockets = [
+    {x: 0,     y: 0},
+    {x: W/2,   y: 0},
+    {x: W,     y: 0},
+    {x: 0,     y: H},
+    {x: W/2,   y: H},
+    {x: W,     y: H},
+  ];
+
+  /** Ball object: {x,y,vx,vy,color,isCue,alive:true} */
+  let balls = [];
+  let running = false;
+  let lastTime = performance.now();
+
+  function resetRack() {
+    balls = [];
+    // Cue ball
+    balls.push({x: W*0.25, y: H*0.5, vx:0, vy:0, color:'#ffffff', isCue:true, alive:true});
+    // Three object balls (예시)
+    balls.push({x: W*0.72, y: H*0.35, vx:0, vy:0, color:'#fbbf24', isCue:false, alive:true});
+    balls.push({x: W*0.76, y: H*0.50, vx:0, vy:0, color:'#60a5fa', isCue:false, alive:true});
+    balls.push({x: W*0.72, y: H*0.65, vx:0, vy:0, color:'#f472b6', isCue:false, alive:true});
+    running = false;
+    updateStatus();
+  }
+
+  // ===== Helpers =====
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function dist(a,b) { const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy); }
+  function angleTo(from, to) { return Math.atan2(to.y - from.y, to.x - from.x); } // rad
+  function deg(n) { return n * 180 / Math.PI; }
+  function rad(n) { return n * Math.PI / 180; }
+
+  function allStopped() {
+    return balls.every(b => !b.alive || (Math.abs(b.vx) < STOP_EPS && Math.abs(b.vy) < STOP_EPS));
+  }
+
+  function placeCueAtSafe() {
+    const cue = balls.find(b=>b.isCue);
+    cue.x = W*0.25; cue.y = H*0.5; cue.vx = cue.vy = 0;
+  }
+
+  // ===== Physics =====
+  function stepPhysics(dt) {
+    // Integrate
+    for (const b of balls) {
+      if (!b.alive) continue;
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+
+      // Friction (velocity decay)
+      b.vx *= Math.pow(FRICTION, dt / DT_BASE);
+      b.vy *= Math.pow(FRICTION, dt / DT_BASE);
+
+      if (Math.abs(b.vx) < STOP_EPS) b.vx = 0;
+      if (Math.abs(b.vy) < STOP_EPS) b.vy = 0;
+
+      // Cushions
+      if (b.x < BALL_R) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
+      if (b.x > W - BALL_R) { b.x = W - BALL_R; b.vx = -Math.abs(b.vx); }
+      if (b.y < BALL_R) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
+      if (b.y > H - BALL_R) { b.y = H - BALL_R; b.vy = -Math.abs(b.vy); }
+    }
+
+    // Ball-ball collisions (naive O(n^2))
+    for (let i=0;i<balls.length;i++){
+      const bi = balls[i]; if (!bi.alive) continue;
+      for (let j=i+1;j<balls.length;j++){
+        const bj = balls[j]; if (!bj.alive) continue;
+        const dx = bj.x - bi.x, dy = bj.y - bi.y;
+        const d = Math.hypot(dx, dy);
+        const minDist = BALL_R*2;
+        if (d > 0 && d < minDist) {
+          // push apart
+          const overlap = minDist - d;
+          const nx = dx / d, ny = dy / d;
+          bi.x -= nx * overlap/2; bi.y -= ny * overlap/2;
+          bj.x += nx * overlap/2; bj.y += ny * overlap/2;
+
+          // relative velocity along normal
+          const rvx = bi.vx - bj.vx;
+          const rvy = bi.vy - bj.vy;
+          const rel = rvx*nx + rvy*ny; // >0 approaching
+          if (rel > 0) {
+            // equal mass elastic: swap normal components
+            const v1n = bi.vx*nx + bi.vy*ny;
+            const v1t = -bi.vx*ny + bi.vy*nx;
+            const v2n = bj.vx*nx + bj.vy*ny;
+            const v2t = -bj.vx*ny + bj.vy*nx;
+            const v1nAfter = v2n;
+            const v2nAfter = v1n;
+            bi.vx = v1nAfter*nx + v1t*(-ny);
+            bi.vy = v1nAfter*ny + v1t*(nx);
+            bj.vx = v2nAfter*nx + v2t*(-ny);
+            bj.vy = v2nAfter*ny + v2t*(nx);
+          }
+        }
+      }
+    }
+
+    // Pockets
+    for (const b of balls) {
+      if (!b.alive) continue;
+      for (const p of pockets) {
+        if (dist(b, p) < POCKET_R - 2) {
+          if (b.isCue) {
+            // Foul: respawn cue ball
+            placeCueAtSafe();
+          } else {
+            b.alive = false; b.vx = b.vy = 0;
+          }
+        }
+      }
+    }
+  }
+
+  // ===== Rendering =====
+  function drawTable() {
+    // Rails
+    ctx.fillStyle = varGet('--rail');
+    ctx.fillRect(0,0,W,H);
+
+    // Felt
+    ctx.fillStyle = varGet('--bg');
+    const rail = 18; // rail thickness
+    ctx.fillRect(rail, rail, W-rail*2, H-rail*2);
+
+    // Pockets
+    for (const p of pockets) {
+      ctx.beginPath();
+      ctx.fillStyle = varGet('--pocket');
+      ctx.arc(p.x, p.y, POCKET_R, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function varGet(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name);
+  }
+
+  function drawBalls() {
+    for (const b of balls) {
+      if (!b.alive) continue;
+      ctx.beginPath();
+      ctx.fillStyle = b.color;
+      ctx.arc(b.x, b.y, BALL_R, 0, Math.PI*2);
+      ctx.fill();
+      // cue dot
+      if (b.isCue) {
+        ctx.beginPath();
+        ctx.fillStyle = '#333';
+        ctx.arc(b.x + 0, b.y + 0, 2.2, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawGuides() {
+    const show = document.getElementById('showLines').checked;
+    if (!show) return;
+
+    const cue = balls.find(b=>b.isCue);
+    if (!cue || !cue.alive) return;
+
+    // Draw current input aim line
+    const angDeg = parseFloat(document.getElementById('angle').value || '0');
+    const a = rad(angDeg);
+    const len = 140;
+    const tx = cue.x + Math.cos(a)*len;
+    const ty = cue.y + Math.sin(a)*len;
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6,6]);
+    ctx.beginPath();
+    ctx.moveTo(cue.x, cue.y);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function render() {
+    // clear
+    ctx.clearRect(0,0,W,H);
+    drawTable();
+    drawBalls();
+    drawGuides();
+  }
+
+  // ===== Game Loop =====
+  function loop(now){
+    const slow = document.getElementById('slowMo').checked;
+    let dt = (now - lastTime) / 1000; // seconds
+    lastTime = now;
+    // Clamp & slowmo
+    dt = Math.min(dt, 0.05);
+    if (slow) dt *= 0.35;
+
+    if (running) {
+      // substeps for stability
+      const steps = Math.max(1, Math.floor(dt / DT_BASE));
+      const h = dt / steps;
+      for (let i=0;i<steps;i++) stepPhysics(h);
+      if (allStopped()) running = false;
+    }
+
+    render();
+    updateStatus();
+    requestAnimationFrame(loop);
+  }
+
+  // ===== Controls =====
+  function shoot(angleDeg, power){
+    if (running) return;
+    const cue = balls.find(b=>b.isCue);
+    if (!cue || !cue.alive) return;
+    const a = rad(angleDeg);
+    const speed = clamp(power, 0, 100) / 100 * POWER_TO_SPEED * 100; // tune multiplier
+    cue.vx = Math.cos(a) * speed;
+    cue.vy = Math.sin(a) * speed;
+    running = true;
+  }
+
+  function recommendShot(){
+    const cue = balls.find(b=>b.isCue);
+    const objs = balls.filter(b=>!b.isCue && b.alive);
+    if (!cue || objs.length === 0) return {angle:0, power:0};
+    // 1) 가장 가까운 목적구
+    const obj = objs.reduce((best,cur)=> (dist(cue,cur) < dist(cue,best) ? cur : best), objs[0]);
+    // 2) 가장 가까운 포켓
+    const pocket = pockets.reduce((bp,cp)=> (dist(obj,cp) < dist(obj,bp) ? cp : bp), pockets[0]);
+    // 3) 접점 추정: 목적구 중심에서 포켓 방향으로 반지름만큼 뒤로
+    const th = angleTo(obj, pocket);
+    const contact = {x: obj.x - BALL_R*Math.cos(th), y: obj.y - BALL_R*Math.sin(th)};
+    // 4) 큐→접점 방향이 에임
+    const ang = deg(angleTo(cue, contact));
+    // 5) 간단 파워 휴리스틱
+    const power = clamp( Math.round( 0.22*dist(cue,obj) + 0.18*dist(obj,pocket) ), 18, 100 );
+    return {angle: (ang+360)%360, power};
+  }
+
+  function updateStatus(){
+    const s = document.getElementById('status');
+    const left = balls.filter(b=>!b.isCue && b.alive).length;
+    const canShoot = !running && left > 0;
+    document.getElementById('shoot').disabled = !canShoot;
+    document.getElementById('recommend').disabled = !canShoot;
+    s.textContent = running ? '시뮬레이션 중… 모든 공이 멈추면 다음 샷 가능' : `잔여 목적구: ${left}`;
+  }
+
+  // Event wiring
+  document.getElementById('shoot').addEventListener('click', () => {
+    const a = parseFloat(document.getElementById('angle').value || '0');
+    const p = parseFloat(document.getElementById('power').value || '0');
+    shoot(a, p);
+  });
+  document.getElementById('recommend').addEventListener('click', () => {
+    const rec = recommendShot();
+    document.getElementById('angle').value = rec.angle.toFixed(2);
+    document.getElementById('power').value = Math.round(rec.power);
+  });
+  document.getElementById('reset').addEventListener('click', () => resetRack());
+  document.getElementById('friction').addEventListener('input', (e)=>{ FRICTION = parseFloat(e.target.value); });
+
+  // Boot
+  resetRack();
+  requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
