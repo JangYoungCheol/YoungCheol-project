@@ -1,0 +1,498 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Users, Layers, TerminalSquare, Building2, ArrowDown, ChevronRight,
+  Search, Mail, User, Aperture, Minus, Square, X
+} from 'lucide-react';
+
+// 화면 크기 및 래퍼(Wrapper)의 스크롤 진행도를 추적하는 커스텀 훅
+const useScrollAndWindow = () => {
+  const [windowInfo, setWindowInfo] = useState({ width: 1000, height: 800 });
+  const [scrollY, setScrollY] = useState(0);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => setWindowInfo({ width: window.innerWidth, height: window.innerHeight });
+    const handleScroll = () => {
+      if (scrollRef.current) {
+        setScrollY(scrollRef.current.scrollTop);
+      }
+    };
+
+    handleResize();
+    handleScroll();
+
+    window.addEventListener('resize', handleResize);
+    const scrollEl = scrollRef.current;
+    if (scrollEl) {
+      scrollEl.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (scrollEl) {
+        scrollEl.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+
+  return { ...windowInfo, scrollY, scrollRef };
+};
+
+export default function App() {
+  const { width, height, scrollY, scrollRef } = useScrollAndWindow();
+
+  const progress = height === 0 ? 0 : scrollY / height;
+  const entranceProgress = Math.min(1, progress);
+  const carouselProgress = Math.max(0, progress - 1);
+  const footerProgressRaw = progress - 9;
+  const footerProgress = Math.max(0, Math.min(1, footerProgressRaw));
+
+  const steps = [
+    {
+      id: '01',
+      title: 'Team Building',
+      korTitle: '최적의 팀 매칭',
+      desc: '아이디어를 현실로 구현할 완벽한 핏의 개발자, 기획자를 연결합니다. 복잡한 구인 과정 없이 프로젝트에만 집중하세요.',
+      icon: Users,
+      color: 'bg-white',
+    },
+    {
+      id: '02',
+      title: 'Workspace',
+      korTitle: '프로젝트 생성',
+      desc: '팀이 구성되면 즉시 체계적인 워크스페이스가 셋업됩니다. 기획부터 배포까지 하나의 흐름으로 관리하세요.',
+      icon: Layers,
+      color: 'bg-[#fafafa]',
+    },
+    {
+      id: '03',
+      title: 'Troubleshoot',
+      korTitle: '트러블슈팅 아카이브',
+      desc: '해결하기 어려웠던 버그와 에러를 마크다운으로 기록하세요. 이 과정 자체가 당신의 강력한 무기가 됩니다.',
+      icon: TerminalSquare,
+      color: 'bg-[#f4f4f4]',
+    },
+    {
+      id: '04',
+      title: 'Career Fit',
+      korTitle: '채용 공고 추천',
+      desc: '기록된 프로젝트와 문제 해결 역량을 AI가 분석하여, 당신의 가치를 알아볼 최고의 기업을 제안합니다.',
+      icon: Building2,
+      color: 'bg-[#f0f0f0]',
+    }
+  ];
+
+  const getOffset = (index, currentProgress, totalItems) => {
+    let offset = ((index - currentProgress % totalItems) + totalItems) % totalItems;
+    if (offset > totalItems / 2) offset -= totalItems;
+    return offset;
+  };
+
+  return (
+    <div 
+      ref={scrollRef} 
+      className="h-screen w-full overflow-y-scroll snap-y snap-mandatory bg-[#faf8f5] text-[#111] font-sans selection:bg-yellow-300 selection:text-black scroll-smooth"
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow: hidden; } 
+        
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes slide-right {
+          0%, 100% { transform: translateX(-10%); opacity: 0; }
+          20%, 80% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes typing {
+          0%, 100% { width: 0%; }
+          30%, 70% { width: 100%; }
+        }
+        @keyframes fill-bar {
+          0%, 100% { width: 10%; }
+          40%, 60% { width: 98%; }
+        }
+        @keyframes move-cursor {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(60px, 40px); }
+        }
+        /* 꿀벌의 통통 튀는 애니메이션 */
+        @keyframes bee-wiggle {
+          0%, 100% { transform: translateY(0) rotate(-5deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        .animate-typing { overflow: hidden; white-space: nowrap; animation: typing 3s infinite; }
+        .animate-fill { animation: fill-bar 3s infinite ease-in-out; }
+        .animate-cursor { animation: move-cursor 3s infinite ease-in-out; }
+        .animate-bee-wiggle { animation: bee-wiggle 4s ease-in-out infinite; }
+        
+        @keyframes ticker {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-ticker {
+          display: inline-block;
+          white-space: nowrap;
+          animation: ticker 25s linear infinite;
+        }
+        .pill-text {
+          background: rgba(250, 204, 21, 0.2);
+          padding: 0.2rem 0.6rem;
+          border-radius: 0.5rem;
+          font-family: monospace;
+          letter-spacing: -0.5px;
+        }
+      `}</style>
+
+      {/* =========================================================
+          고정형 글로벌 헤더 (화이트 & 밝은 무드)
+          ========================================================= */}
+      <nav className="fixed top-0 left-0 right-0 h-[64px] bg-white border-b border-gray-100 z-[100] flex items-center justify-between px-6 shadow-sm">
+        <div className="flex items-center gap-2">
+          {/* 레퍼런스 기반의 노란색 꽃/바람개비 로고 */}
+          <Aperture className="text-yellow-400 w-8 h-8" strokeWidth={2.5} />
+        </div>
+
+        <div className="hidden md:flex items-center gap-8 font-bold text-gray-700 text-[15px]">
+          <a href="#" className="hover:text-yellow-500 transition-colors">프로젝트</a>
+          <a href="#" className="hover:text-yellow-500 transition-colors">팀 매칭</a>
+          <a href="#" className="hover:text-yellow-500 transition-colors">포트폴리오</a>
+          <a href="#" className="hover:text-yellow-500 transition-colors">채용</a>
+        </div>
+
+        <div className="flex items-center gap-5">
+          <div className="relative hidden md:block">
+            <Search className="w-[18px] h-[18px] absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Search" 
+              className="pl-9 pr-4 py-1.5 w-48 bg-gray-50 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all placeholder:text-gray-400"
+            />
+          </div>
+          <button className="text-gray-500 hover:text-black transition-colors">
+            <Mail className="w-[22px] h-[22px]" strokeWidth={2} />
+          </button>
+          <button className="text-gray-500 hover:text-black transition-colors">
+            <User className="w-[22px] h-[22px]" strokeWidth={2} />
+          </button>
+        </div>
+      </nav>
+
+      {/* =========================================================
+          섹션 1: 스크롤 아크 (Arc) 애니메이션 영역 
+          ========================================================= */}
+      <div style={{ height: '500vh' }} className="relative">
+        
+        {/* 스냅 타겟 */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none flex flex-col z-0">
+          <div className="h-screen w-full snap-start snap-always" /> 
+          <div className="h-screen w-full snap-start snap-always" /> 
+          <div className="h-screen w-full snap-start snap-always" /> 
+          <div className="h-screen w-full snap-start snap-always" /> 
+          <div className="h-screen w-full snap-start snap-always" /> 
+        </div>
+
+        <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col pointer-events-none pt-[64px]">
+          
+          {/* 히어로 타이틀 */}
+          <div 
+            className="absolute inset-0 flex flex-col items-center justify-start pt-[12vh] md:pt-[15vh] pointer-events-none z-10 will-change-transform"
+            style={{
+              opacity: Math.max(0, 1 - entranceProgress * 1.8),
+              transform: `translateY(-${entranceProgress * 200}px)`
+            }}
+          >
+            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-bold tracking-tighter text-center leading-[0.9] flex items-center justify-center gap-2 md:gap-6 flex-wrap px-4 text-[#111]">
+              Dev Toolkit 
+              
+              {/* 통통 튀는 귀여운 꿀벌 이미지 */}
+              <img 
+                src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Honeybee.png" 
+                alt="꿀벌 캐릭터" 
+                className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 animate-bee-wiggle drop-shadow-xl z-20"
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = "https://cdn-icons-png.flaticon.com/512/616/616430.png";
+                }}
+              />
+
+              Built to Flex
+            </h1>
+            <div className="mt-8 text-center text-lg md:text-xl font-medium text-gray-600 leading-relaxed max-w-3xl px-6">
+              아이디어부터 채용까지. <br className="hidden md:block"/>
+              파편화된 개발자의 여정을 <span className="pill-text font-bold text-yellow-600">하나의 완벽한 흐름</span>으로 연결합니다.
+            </div>
+          </div>
+
+          {/* 무한 회전 아크 (Arc) 밝은 카드 렌더링 */}
+          <div className="absolute top-[55%] md:top-[58%] left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20">
+            {steps.map((step, index) => {
+              const offset = getOffset(index, carouselProgress, steps.length);
+              const spreadX = width > 768 ? 440 : 260; 
+              const x = offset * spreadX;
+              const arcY = offset * offset * 60; 
+              
+              const entranceY = (1 - entranceProgress) * (height * 0.6);
+              const y = arcY + entranceY;
+              
+              const rotation = offset * 12;
+              const scale = 1 - Math.abs(offset) * 0.15; 
+              const opacity = Math.max(0, 1 - Math.abs(offset) * 0.6); 
+              const zIndex = 30 - Math.abs(offset) * 10;
+
+              return (
+                <div
+                  key={step.id}
+                  className="absolute top-1/2 left-1/2 pointer-events-auto will-change-transform"
+                  style={{
+                    transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rotation}deg) scale(${scale})`,
+                    zIndex: Math.round(zIndex),
+                    opacity: opacity,
+                  }}
+                >
+                  <div className={`w-[280px] h-[400px] md:w-[380px] md:h-[500px] ${step.color} rounded-[2rem] border border-gray-200 p-6 md:p-8 flex flex-col justify-between text-[#111] overflow-hidden shadow-2xl group hover:border-yellow-400 transition-colors`}>
+                    <div className="flex justify-between items-start">
+                      <span className="font-mono text-xs md:text-sm text-gray-400 tracking-widest font-bold">PHASE {step.id}</span>
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-400 shadow-[0_0_8px_#facc15]"></div>
+                    </div>
+                    
+                    <div className="flex-1 flex items-center justify-center relative">
+                      <step.icon className="w-24 h-24 md:w-32 md:h-32 text-gray-800 drop-shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:text-yellow-500" strokeWidth={1.5} />
+                    </div>
+                    
+                    <div className="flex flex-col gap-4">
+                      <div>
+                        <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight">{step.title}</h3>
+                        <p className="text-gray-500 mt-1 text-sm font-bold">{step.korTitle}</p>
+                      </div>
+                      
+                      <button className="w-full bg-[#111] hover:bg-yellow-400 hover:text-black text-white py-3 md:py-4 rounded-full font-bold text-sm md:text-base flex items-center justify-center gap-2 transition-all group/btn shadow-md">
+                        바로가기
+                        <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div 
+            className="absolute bottom-6 right-6 md:right-12 flex flex-col items-center gap-2 text-gray-400 transition-opacity duration-300 pointer-events-none"
+            style={{ opacity: progress > 4.5 ? 0 : 1 }}
+          >
+            <span className="text-[10px] uppercase tracking-widest font-bold">Scroll</span>
+            <ArrowDown className="w-4 h-4 animate-bounce" />
+          </div>
+
+        </div>
+      </div>
+
+      {/* =========================================================
+          섹션 2: 상세 리스트 영역 (밝은 테마 + 윈도우 스타일 브라우저)
+          ========================================================= */}
+      
+      {/* 2-1. 상세 리스트 인트로 */}
+      <div className="h-screen w-full snap-start snap-always bg-white text-[#111] flex flex-col items-center justify-center relative z-40 pt-[64px]">
+        <div className="text-center px-6">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-yellow-100 text-yellow-600 text-sm font-bold mb-6 border border-yellow-200 shadow-sm">
+            How it works
+          </div>
+          <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-8">In-depth Workflow</h2>
+          <p className="text-gray-500 text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed font-medium">
+            단순한 매칭을 넘어, 개발 사이클 전체를 <br className="hidden md:block"/>
+            직관적인 하나의 화면 안에서 제어하고 경험하세요.
+          </p>
+          <ArrowDown className="w-8 h-8 text-yellow-400 mx-auto mt-16 animate-bounce" />
+        </div>
+      </div>
+
+      {/* 2-2. 상세 리스트 아이템들 (GIF 모션 + 윈도우 UI 적용) */}
+      {steps.map((step) => (
+        <div 
+          key={`list-${step.id}`} 
+          className="h-screen w-full snap-start snap-always bg-white text-[#111] flex items-center justify-center border-t border-gray-100 relative z-40 px-6 pt-[64px]"
+        >
+          <div className="max-w-6xl mx-auto w-full flex flex-col md:flex-row gap-8 md:gap-16 items-center">
+            
+            {/* 텍스트 영역 */}
+            <div className="flex-1 text-center md:text-left order-2 md:order-1">
+              <div className="text-6xl md:text-8xl font-black text-gray-100 tracking-tighter mb-2">
+                {step.id}
+              </div>
+              <div className="inline-block px-3 py-1 rounded-md bg-yellow-400 text-black text-xs font-bold mb-4 shadow-sm">
+                {step.korTitle}
+              </div>
+              <h3 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">
+                {step.title}
+              </h3>
+              <p className="text-lg md:text-xl text-gray-500 leading-relaxed max-w-lg mx-auto md:mx-0 font-medium">
+                {step.desc}
+              </p>
+              
+              <button className="mt-8 flex items-center justify-center md:justify-start gap-2 text-[#111] font-bold group mx-auto md:mx-0 text-base border border-gray-300 px-6 py-3 rounded-full hover:bg-yellow-400 hover:border-yellow-400 transition-all shadow-sm">
+                상세 기능 알아보기
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-all" />
+              </button>
+            </div>
+            
+            {/* 우측 모의 웹 화면 (Windows 스타일 윈도우 컨트롤러 + 밝은 테마) */}
+            <div className="w-full md:w-[500px] h-[300px] md:h-[360px] bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden shadow-2xl order-1 md:order-2">
+              
+              {/* 브라우저 상단 바 (Windows Style) */}
+              <div className="h-9 bg-gray-100 border-b border-gray-200 flex items-center justify-between px-3 shrink-0">
+                <div className="flex-1 text-left text-[11px] font-mono text-gray-500 truncate">
+                  gguljob.app/workflow/{step.id}
+                </div>
+                {/* 윈도우 스타일 버튼 세트 */}
+                <div className="flex items-center gap-3 text-gray-400">
+                  <Minus className="w-4 h-4 hover:text-black cursor-pointer transition-colors" />
+                  <Square className="w-3.5 h-3.5 hover:text-black cursor-pointer transition-colors" />
+                  <X className="w-4 h-4 hover:text-red-500 cursor-pointer transition-colors" />
+                </div>
+              </div>
+
+              {/* 브라우저 내부 콘텐츠 (밝은 테마 애니메이션) */}
+              <div className="flex-1 relative p-6 bg-gray-50/50">
+                
+                {step.id === '01' && (
+                  <div className="w-full h-full flex flex-col gap-3">
+                    <div className="h-4 w-1/3 bg-gray-200 rounded"></div>
+                    <div className="flex-1 border border-yellow-300 bg-white rounded-lg p-4 flex items-center gap-4 relative overflow-hidden shadow-sm">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full shrink-0 border border-gray-200"></div>
+                      <div className="flex-1">
+                        <div className="h-3 w-1/2 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-2 w-3/4 bg-gray-100 rounded"></div>
+                      </div>
+                      <div className="px-3 py-1 bg-yellow-400 text-black text-[10px] font-bold rounded-full animate-pulse shadow-sm">
+                        98% MATCH
+                      </div>
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-yellow-200/40 to-transparent animate-[slide-right_2s_infinite]"></div>
+                    </div>
+                    <div className="h-16 border border-gray-200 bg-white rounded-lg flex items-center p-4 gap-4 opacity-50 shadow-sm">
+                      <div className="w-8 h-8 bg-gray-100 rounded-full shrink-0"></div>
+                      <div className="h-2 w-1/2 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                )}
+
+                {step.id === '02' && (
+                  <div className="w-full h-full flex gap-4">
+                    <div className="flex-1 bg-gray-100 rounded-lg p-3 border border-gray-200">
+                      <div className="h-2 w-1/2 bg-gray-300 rounded mb-3"></div>
+                      <div className="h-12 bg-white rounded flex items-center px-3 shadow-sm text-xs font-bold text-gray-500 opacity-60">Task 1</div>
+                    </div>
+                    <div className="flex-1 bg-gray-100 rounded-lg p-3 border border-gray-200 relative">
+                      <div className="h-2 w-1/2 bg-gray-300 rounded mb-3"></div>
+                      <div className="h-12 bg-white rounded flex items-center px-3 mb-2 shadow-sm text-xs font-bold text-gray-500 opacity-60">Task 2</div>
+                      <div className="absolute top-10 left-[-110%] w-[calc(100%-24px)] h-12 bg-yellow-100 border border-yellow-300 rounded flex items-center px-3 text-[11px] text-yellow-700 font-bold animate-[slide-right_3s_ease-in-out_infinite] z-10 shadow-md">
+                        Moving Task...
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 코딩 화면은 대조를 위해 다크 테마 유지 */}
+                {step.id === '03' && (
+                  <div className="w-full h-full bg-[#1e1e1e] rounded-lg p-4 font-mono text-xs border border-gray-300 relative shadow-inner">
+                    <div className="text-red-400 mb-2">&gt; Error: Stack overflow exception</div>
+                    <div className="text-gray-400 mb-2">Fixing issue...</div>
+                    <div className="text-green-400 animate-typing">
+                      <span className="text-blue-400">const</span> solution = <span className="text-yellow-200">resolveBug()</span>;
+                    </div>
+                    <div className="absolute bottom-4 right-4 px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded text-[10px] font-bold animate-pulse">
+                      ✓ RESOLVED
+                    </div>
+                  </div>
+                )}
+
+                {step.id === '04' && (
+                  <div className="w-full h-full flex flex-col items-center justify-center relative bg-white rounded-lg border border-gray-100">
+                    <div className="w-32 h-32 rounded-full border-[8px] border-gray-100 flex items-center justify-center relative shadow-inner">
+                       <div className="text-3xl font-black text-yellow-500">95%</div>
+                       <div className="text-[10px] font-bold text-gray-400 absolute bottom-4">FIT SCORE</div>
+                    </div>
+                    <div className="mt-4 w-2/3 h-2 bg-gray-100 rounded-full overflow-hidden">
+                       <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-300 animate-fill rounded-full"></div>
+                    </div>
+                    <div className="absolute top-1/4 left-1/4 animate-cursor z-20">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.5 3.21V20.8C5.5 21.43 6.24 21.76 6.71 21.34L11.43 17.06C11.63 16.88 11.89 16.78 12.16 16.78H18.8C19.46 16.78 19.82 16.02 19.39 15.52L6.1 3.03C5.66 2.62 5.5 2.9 5.5 3.21Z" fill="black" stroke="white" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                  </div>
+                )}
+                
+              </div>
+            </div>
+
+          </div>
+        </div>
+      ))}
+
+      {/* =========================================================
+          섹션 3: 웅장한 타이포그래피 푸터 (노란색 배경 & 엄청나게 큰 폰트)
+          ========================================================= */}
+      <footer className="h-screen w-full snap-start snap-always bg-yellow-400 flex flex-col justify-between text-[#111] relative z-40 overflow-hidden pt-24">
+        
+        {/* 네온 틱커 테이프 추가 (상단) */}
+        <div className="absolute top-0 left-0 w-full bg-[#111] text-yellow-400 text-[11px] font-bold uppercase tracking-widest py-2 border-y border-[#222]">
+          <div className="animate-ticker">
+            <span>* WELCOME TO GGULJOB * BUILD YOUR TEAM * CREATE WORKSPACE * ARCHIVE TROUBLESHOOTING * GET HIRED * </span>
+            <span>* WELCOME TO GGULJOB * BUILD YOUR TEAM * CREATE WORKSPACE * ARCHIVE TROUBLESHOOTING * GET HIRED * </span>
+            <span>* WELCOME TO GGULJOB * BUILD YOUR TEAM * CREATE WORKSPACE * ARCHIVE TROUBLESHOOTING * GET HIRED * </span>
+          </div>
+        </div>
+
+        <div className="w-full max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm font-bold z-10 mt-12">
+          <div className="flex flex-col gap-3">
+            <h4 className="text-black mb-2 font-black tracking-tight text-lg">Platform</h4>
+            <a href="#" className="hover:text-white transition-colors">Team Building</a>
+            <a href="#" className="hover:text-white transition-colors">Workspace</a>
+            <a href="#" className="hover:text-white transition-colors">Troubleshooting</a>
+          </div>
+          <div className="flex flex-col gap-3">
+            <h4 className="text-black mb-2 font-black tracking-tight text-lg">Company</h4>
+            <a href="#" className="hover:text-white transition-colors">About</a>
+            <a href="#" className="hover:text-white transition-colors">Careers</a>
+            <a href="#" className="hover:text-white transition-colors">Contact</a>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center w-full relative -mt-6">
+          <h2 
+            className="text-[#111] text-center font-black tracking-tighter flex justify-center w-full whitespace-nowrap drop-shadow-sm" 
+            style={{ fontSize: '24vw', lineHeight: 0.85 }}
+          >
+            {['G', 'G', 'U', 'L', '\u00A0', 'J', 'O', 'B'].map((char, index) => {
+              const offset = index - 3.5; 
+              const curve = 1 - Math.pow(footerProgress, 2); 
+              const translateY = offset * offset * 3 * curve; 
+              const rotation = offset * 10 * curve; 
+
+              return (
+                <span 
+                  key={index} 
+                  className="inline-block will-change-transform"
+                  style={{
+                    transform: `translateY(${translateY}vw) rotate(${rotation}deg)`,
+                  }}
+                >
+                  {char}
+                </span>
+              );
+            })}
+          </h2>
+        </div>
+
+        <div className="w-full text-center pb-8 z-10 border-t border-[#111]/10 pt-6 mt-auto">
+          <p className="text-[10px] md:text-xs tracking-widest uppercase font-extrabold text-[#111]/50">
+            © 2026 GGULJOB Inc. The Ultimate Career Toolkit.
+          </p>
+        </div>
+      </footer>
+
+    </div>
+  );
+}
