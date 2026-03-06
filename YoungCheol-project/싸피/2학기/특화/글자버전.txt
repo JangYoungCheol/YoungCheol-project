@@ -1,0 +1,196 @@
+import React from 'react';
+import { Search, Mail, User, LogOut, Bookmark, ChevronDown, Star } from 'lucide-react';
+
+export default function JobPostingPage() {
+  // 채용 공고 더미 데이터 (시안과 동일)
+  const jobs = [
+    { id: 1, company: '토스', logo: 'T', logoBg: 'bg-blue-600', isNew: true, isHot: true, title: 'Frontend Engineer (React)', location: '서울 강남구', exp: '신입·경력 1~3년', type: '정규직', salary: '5,000~7,000만원', match: 94 },
+    { id: 2, company: '카카오', logo: 'K', logoBg: 'bg-yellow-400 text-black', isNew: true, isHot: false, title: '풀스택 개발자 (React + Spring)', location: '경기 판교', exp: '경력 2~5년', type: '정규직', salary: '5,500~8,000만원', match: 91 },
+    { id: 3, company: '네이버', logo: 'N', logoBg: 'bg-green-500', isNew: false, isHot: true, title: '프론트엔드 개발자', location: '경기 판교', exp: '신입·경력 1~3년', type: '정규직', salary: '5,000~7,500만원', match: 87 },
+    { id: 4, company: '당근', logo: '당', logoBg: 'bg-orange-500', isNew: false, isHot: false, title: '프론트엔드 엔지니어 (웹)', location: '서울 서초구', exp: '신입·경력 1~3년', type: '정규직', salary: '5,000~7,500만원', match: 85 },
+    { id: 5, company: '라인', logo: 'L', logoBg: 'bg-green-600', isNew: false, isHot: false, title: 'Web Frontend Developer', location: '경기 판교', exp: '경력 1~4년', type: '정규직', salary: '5,000~7,000만원', match: 83 },
+    { id: 6, company: '배달의민족', logo: 'B', logoBg: 'bg-teal-400', isNew: false, isHot: false, title: 'React 프론트엔드 개발자', location: '서울 송파구', exp: '경력 1~3년', type: '정규직', salary: '5,000~7,000만원', match: 80 },
+    { id: 7, company: '쿠팡', logo: 'C', logoBg: 'bg-red-600', isNew: true, isHot: false, title: 'Backend Engineer (Java/Spring)', location: '서울 송파구', exp: '경력 2~5년', type: '정규직', salary: '6,000~9,000만원', match: 78 },
+    { id: 8, company: '비바리퍼블리카', logo: 'V', logoBg: 'bg-blue-600', isNew: false, isHot: false, title: 'Server Engineer (Spring Boot)', location: '서울 강남구', exp: '경력 3~7년', type: '정규직', salary: '6,000~9,500만원', match: 76 },
+  ];
+
+  const techTags = ['React', 'TypeScript', 'Next.js', 'GraphQL', 'Spring Boot', 'MySQL', 'Kubernetes', 'Node.js', 'Redis', 'Webpack', 'Jest', 'Kafka', 'Storybook', 'MobX', 'Emotion', 'AWS'];
+  const userTechs = ['React', 'TypeScript', 'Spring Boot', 'MySQL', 'Redis', 'Git'];
+
+  // 적합도 텍스트 변환 함수
+  const getMatchStatus = (score) => {
+    if (score >= 85) return { text: '적합', style: 'bg-green-50 text-green-600 border-green-200' };
+    if (score >= 80) return { text: '보통', style: 'bg-orange-50 text-orange-500 border-orange-200' };
+    return { text: '부족', style: 'bg-red-50 text-red-500 border-red-200' };
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8F9FC] font-sans flex flex-col items-center antialiased">
+      
+      {/* 0. 상단 네비게이션 바 */}
+      <header className="w-full flex justify-center sticky top-0 z-50 bg-white border-b border-gray-100 min-w-[1099px]">
+        <div className="w-[1099px] h-[72px] px-4 flex items-center justify-between">
+          <div className="flex items-center gap-12">
+            <div className="text-yellow-500 font-black text-2xl flex items-center gap-1">
+              <span className="text-3xl">❀</span>
+            </div>
+            <nav className="flex items-center gap-8 font-bold text-gray-800 text-[14px]">
+              <a href="#" className="hover:text-yellow-600 transition-colors">프로젝트</a>
+              <a href="#" className="hover:text-yellow-600 transition-colors">프로젝트 찾기</a>
+              <a href="#" className="hover:text-yellow-600 transition-colors">채용</a>
+            </nav>
+          </div>
+          <div className="flex items-center gap-5">
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input type="text" placeholder="Search" className="bg-gray-50 border border-gray-200 rounded-lg py-2 pl-9 pr-4 w-56 text-sm focus:outline-none" />
+            </div>
+            <div className="flex items-center gap-4 text-gray-700">
+              <button><Mail className="w-5 h-5" /></button>
+              <button><User className="w-5 h-5" /></button>
+              <button><LogOut className="w-5 h-5" /></button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 메인 콘텐츠 컨테이너 */}
+      <main className="w-[1099px] flex flex-col pt-10 pb-20 px-4">
+        
+        {/* 타이틀 */}
+        <div className="mb-6">
+          <h1 className="text-[28px] font-extrabold text-gray-900 mb-1">채용 공고</h1>
+          <p className="text-[14px] text-gray-500">AI가 분석한 기술 스택 유사도 기반 맞춤 채용 추천</p>
+        </div>
+
+        {/* 1. AI 맞춤 추천 배너 */}
+        <div className="w-full bg-[#FFF9D2] rounded-[24px] p-8 flex justify-between items-center mb-10">
+          <div>
+            <div className="flex items-center gap-1.5 text-orange-500 font-bold text-[14px] mb-2">
+              <Star className="w-4 h-4 fill-orange-500" /> AI 맞춤 추천
+            </div>
+            <h2 className="text-[24px] font-extrabold text-gray-900 leading-tight mb-2">
+              김도현님의 기술 스택과<br />가장 잘 맞는 공고를 찾았어요
+            </h2>
+            <p className="text-[13px] text-gray-600 mb-5">포트폴리오 키워드와 기술 스택 유사도를 분석하여 추천합니다</p>
+            <div className="flex flex-wrap gap-2">
+              {userTechs.map(tech => (
+                <span key={tech} className="px-3 py-1 bg-[#FDE68A] text-yellow-800 rounded-md text-[12px] font-bold">
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 w-[380px]">
+            {jobs.slice(0, 3).map((job, idx) => {
+              const status = getMatchStatus(job.match);
+              return (
+                <div key={job.id} className="bg-white/80 backdrop-blur-sm rounded-xl p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[13px] font-bold text-gray-400 w-3">{idx + 1}</span>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-[14px] ${job.logoBg}`}>
+                      {job.logo}
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-bold text-gray-900 leading-tight">{job.title}</p>
+                      <p className="text-[11px] text-gray-500">{job.company}</p>
+                    </div>
+                  </div>
+                  {/* 상단 배너 내 적합도 뱃지 */}
+                  <div className={`px-2 py-0.5 rounded border text-[11px] font-bold mr-1 ${status.style}`}>
+                    {status.text}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 2. 필터 및 정렬 태그 */}
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="flex flex-wrap gap-2">
+            <button className="px-4 py-1.5 bg-gray-900 text-white rounded-full text-[13px] font-bold">전체</button>
+            {techTags.map(tag => (
+              <button key={tag} className="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-[13px] font-medium hover:bg-gray-50">
+                {tag}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button className="px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-[13px] font-bold flex items-center gap-1.5">
+              <Bookmark className="w-3.5 h-3.5" /> 북마크 (1)
+            </button>
+            <button className="px-4 py-1.5 bg-gray-900 text-white rounded-full text-[13px] font-bold">매칭순</button>
+            <button className="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-[13px] font-medium">마감순</button>
+            <button className="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-[13px] font-medium">연봉순</button>
+          </div>
+        </div>
+
+        {/* 3. 공고 리스트 (텍스트 뱃지 적용) */}
+        <div className="mb-4">
+          <span className="text-[14px] font-bold text-gray-500">총 <span className="text-gray-900">{jobs.length}</span>개 공고</span>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {jobs.map(job => {
+            const status = getMatchStatus(job.match);
+            return (
+              <div key={job.id} className="bg-white rounded-[20px] p-6 flex items-center justify-between border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                
+                {/* 좌측 정보 */}
+                <div className="flex items-center gap-6">
+                  <div className={`w-[60px] h-[60px] rounded-2xl flex items-center justify-center text-white font-extrabold text-[24px] shadow-sm ${job.logoBg}`}>
+                    {job.logo}
+                  </div>
+                  
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[14px] font-bold text-gray-600">{job.company}</span>
+                      {job.isNew && <span className="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[10px] font-extrabold">NEW</span>}
+                      {job.isHot && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-extrabold">HOT</span>}
+                    </div>
+                    
+                    <h3 className="text-[18px] font-extrabold text-gray-900">{job.title}</h3>
+                    
+                    <div className="flex items-center gap-3 text-[13px] text-gray-500 font-medium">
+                      <span>{job.location}</span>
+                      <span className="w-0.5 h-0.5 bg-gray-300 rounded-full" />
+                      <span>{job.exp}</span>
+                      <span className="w-0.5 h-0.5 bg-gray-300 rounded-full" />
+                      <span>{job.type}</span>
+                      <span className="w-0.5 h-0.5 bg-gray-300 rounded-full" />
+                      <span className="text-[#EACB65] font-bold">{job.salary}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 우측 적합도 뱃지 및 아이콘 */}
+                <div className="flex items-center gap-6">
+                  
+                  {/* 게이지바 대신 텍스트 뱃지 표시 */}
+                  <div className="flex flex-col items-end gap-1.5">
+                    <div className={`px-3 py-1 rounded-full border text-[13px] font-bold ${status.style}`}>
+                      {status.text}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 ml-2">
+                    <button className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-xl text-gray-400 hover:text-yellow-500 transition-colors">
+                      <Bookmark className="w-4 h-4" />
+                    </button>
+                    <button className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-900">
+                      <ChevronDown className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+      </main>
+    </div>
+  );
+}
