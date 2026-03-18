@@ -4,7 +4,7 @@
 
 <div align="center">
   <a href="https://git.io/typing-svg">
-    <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=764BA2&center=true&vCenter=true&width=600&lines=고객의+언어를+이해하는+개발자;복잡한+비즈니스+로직을+직관적인+UI로;금융+도메인+%2B+프론트엔드+전문성" alt="Typing SVG" />
+    <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=764BA2&center=true&vCenter=true&width=600&lines=Finance+%2B+Frontend+%3D+%F0%9F%92%9C;사용자의+경험을+코드로+설계합니다;복잡한+로직을+직관적인+UI로" alt="Typing SVG" />
   </a>
 </div>
 
@@ -13,7 +13,7 @@
 <div align="center">
   <img src="https://img.shields.io/badge/Frontend-Engineer-764ba2?style=for-the-badge" />
   <img src="https://img.shields.io/badge/SSAFY-14기-0075c8?style=for-the-badge&logo=samsung&logoColor=white" />
-  <img src="https://img.shields.io/badge/Finance-2년 경력-2ecc71?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Finance-5년+경험-2ecc71?style=for-the-badge" />
 </div>
 
 <br/>
@@ -24,9 +24,11 @@
 
 <div align="center">
 
-2년간의 **제2금융권 여·수신 및 공제업무 경험**으로 쌓은 사용자 공감 능력과<br/>
-**SSAFY**에서 다듬은 기술력을 결합하여,<br/>
-복잡한 비즈니스 로직을 **직관적인 UI**로 풀어내는 프론트엔드 개발자입니다.
+🏦 **금융 현장 5년** → 고객이 원하는 것을 누구보다 잘 압니다
+
+💻 **SSAFY 14기** → 그 경험을 코드로 구현하는 기술을 쌓고 있습니다
+
+🎯 **목표** → 사용자가 설명서 없이도 쓸 수 있는 서비스를 만드는 개발자
 
 </div>
 
@@ -79,8 +81,7 @@
       <h3>🚨 Saivior &nbsp;<img src="https://img.shields.io/badge/🏆 우수상-FFD700?style=flat-square"/></h3>
       <b>재난 및 응급 구조 지원 애플리케이션</b>
       <br/><br/>
-      <img src="https://img.shields.io/badge/Vue.js-4FC08D?style=flat-square&logo=Vue.js&logoColor=white"/>
-      <img src="https://img.shields.io/badge/WebSocket-010101?style=flat-square&logo=socketdotio&logoColor=white"/>
+      <img src="https://img.shields.io/badge/Android_Studio-3DDC84?style=flat-square&logo=androidstudio&logoColor=white"/>
       <br/><br/>
       🎯 <b>Role:</b> 실시간 데이터 시각화 대시보드 구현<br/>
       💡 WebSocket 렌더링 최적화 (60fps 유지)
@@ -111,16 +112,28 @@
 
 ---
 
-## 📈 Education & Experience
+## 📈 Experience
 
 <div align="center">
 
-| 기간 | 내용 |
-|------|------|
-| 2025.07 ~ | 🏫 **SSAFY (삼성청년SW아카데미)** 14기 재학 중 |
-| 2년 | 🏦 **제2금융권** 여·수신 및 공제업무 경력 |
-| 취득 | 🎓 **ADsP** 데이터분석준전문가 자격증 |
+| 기간 | 기관 | 구분 |
+|------|------|------|
+| 2025.07 ~ | 🏫 **SSAFY (삼성청년SW아카데미)** 14기 | 교육 |
+| 2022.11 ~ 2025.01 | 🏦 **부산진신용협동조합** | 정규직 |
+| 2020.04 ~ 2020.06 | 🏛️ **신용보증기금** | 인턴 |
+| 2019.11 ~ 2019.12 | 🏠 **한국주택금융공사** | 인턴 |
 
+</div>
+
+<br/>
+
+---
+
+## 🎓 Certificates
+
+<div align="center">
+  <img src="https://img.shields.io/badge/ADsP-데이터분석준전문가-4A90D9?style=for-the-badge&logo=databricks&logoColor=white"/>
+  <img src="https://img.shields.io/badge/펀드투자권유대행인-취득-27AE60?style=for-the-badge&logo=monero&logoColor=white"/>
 </div>
 
 <br/>
