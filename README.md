@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:667eea,100:764ba2&height=200&section=header&text=Jang%20Youngcheol&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Front-end%20Engineer&descAlignY=58&descAlign=50&descColor=e0d7ff" width="100%" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:667eea,100:764ba2&height=200&section=header&text=Jang%20Youngcheol&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Frontend%20Developer&descAlignY=58&descAlign=50&descColor=e0d7ff" width="100%" />
 </div>
 
 <div align="center">
@@ -12,7 +12,7 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/SSAFY-14기-0075c8?style=for-the-badge&logo=samsung&logoColor=white" />
-  <img src="https://img.shields.io/badge/금융권_경력-5년-2ecc71?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/금융권_경력-2년-2ecc71?style=for-the-badge" />
 </div>
 
 <br/>
@@ -21,8 +21,7 @@
 
 ## 👋 About Me
 
-> 신협 창구에서 하루에 수백 명의 고객을 만나다 보면, 사람들이 어떤 화면에서 멈추고 어떤 말에 고개를 끄덕이는지 보이기 시작합니다.
-> 그 감각을 코드로 옮기고 싶어서 개발을 시작했습니다.
+제2금융권에서 여신, 수신 및 공제 업무를 담당하며 다양한 고객의 니즈를 파악하는 경험을 쌓았습니다. 현재는 이러한 도메인 지식과 소통 능력을 바탕으로, 사용자가 직관적이고 편리하게 사용할 수 있는 서비스를 고민하는 프론트엔드 개발자로 성장하고 있습니다.
 
 <br/>
 
@@ -46,13 +45,6 @@
 ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=Django&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white)
 
-**Tools**
-
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
-![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)
-![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=for-the-badge&logo=androidstudio&logoColor=white)
-
 </div>
 
 <br/>
@@ -64,13 +56,13 @@
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>🐝 꿀잡 (Gguljob)</h3>
+      <h3>🐝 꿀잡 (Gguljob) <code>진행 중</code></h3>
       <b>개발자 커리어 네비게이션 플랫폼</b>
       <br/><br/>
       <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=React&logoColor=black"/>
       <img src="https://img.shields.io/badge/Django-092E20?style=flat-square&logo=Django&logoColor=white"/>
       <br/><br/>
-      프론트엔드 리드로 참여해 단계별 Wizard UI와 실시간 인터랙션을 담당했습니다.
+      개발자를 위한 팀 빌딩 및 직무 추천 서비스 기획 및 프론트엔드 개발을 진행하고 있습니다.
     </td>
     <td width="50%" valign="top">
       <h3>🚨 Saivior &nbsp;<img src="https://img.shields.io/badge/🏆_우수상-FFD700?style=flat-square"/></h3>
@@ -79,7 +71,7 @@
       <img src="https://img.shields.io/badge/Android%20Studio-3DDC84?style=flat-square&logo=androidstudio&logoColor=white"/>
       <img src="https://img.shields.io/badge/Django-092E20?style=flat-square&logo=Django&logoColor=white"/>
       <br/><br/>
-      실시간 데이터 시각화 대시보드와 알림 시스템을 구현했습니다.
+      구조 상황을 위한 센서 데이터 및 AI 기반 알림 시스템 구현에 참여했습니다.
     </td>
   </tr>
   <tr>
@@ -89,9 +81,8 @@
       <br/><br/>
       <img src="https://img.shields.io/badge/Vue.js-4FC08D?style=flat-square&logo=Vue.js&logoColor=white"/>
       <img src="https://img.shields.io/badge/Django-092E20?style=flat-square&logo=Django&logoColor=white"/>
-      <img src="https://img.shields.io/badge/Kakao_Map-FFCD00?style=flat-square&logo=kakao&logoColor=black"/>
       <br/><br/>
-      2인 풀스택. 비동기 처리 개선으로 로딩 속도 5s → 1.2s로 단축했습니다.
+      2인 풀스택 프로젝트로, 맞춤형 금융 상품 추천 및 주변 은행 검색 기능을 구현했습니다.
     </td>
     <td width="50%" valign="top">
       <h3>📊 Algorithm</h3>
@@ -111,10 +102,10 @@
 
 <div align="center">
 
-| 기간 | 기관 | 구분 |
-|:----:|:----:|:----:|
+| 기간 | 기관 | 직무/구분 |
+|:----:|:----|:----:|
 | 2025.07 ~ | 🏫 **SSAFY (삼성청년SW아카데미)** 14기 | 교육 |
-| 2022.11 ~ 2025.01 | 🏦 **부산진신용협동조합** | 정규직 |
+| 2022.11 ~ 2025.01 | 🏦 **부산진신용협동조합** | 여·수신 및 공제 업무 |
 | 2020.04 ~ 2020.06 | 🏛️ **신용보증기금** | 인턴 |
 | 2019.11 ~ 2019.12 | 🏠 **한국주택금융공사** | 인턴 |
 
